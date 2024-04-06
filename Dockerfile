@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17-jdk-alpine 
 
-ADD target/*.jar tourguide-0.0.1-SNAPSHOT.jar
+ADD target/tourguide-0.0.1-SNAPSHOT.jar tourguide-0.0.1-SNAPSHOT.jar.jar
 
 EXPOSE 8080
  
