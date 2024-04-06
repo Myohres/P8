@@ -1,15 +1,9 @@
 name: API TourGuide workflow
 on:
   pull_request:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - '.github/workflows/app-workflow.yaml'
+    branches: [" main" ]
   push:
-    branches: [ main ]
-    paths:
-      - 'src/**'
-      - '.github/workflows/app-workflow.yaml'
+    branches: [ "main" ]
 jobs:
   project-build:
     runs-on: ubuntu-latest
