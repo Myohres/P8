@@ -106,6 +106,39 @@
 					</excludes>
 				</configuration>			
 			</plugin>	
+			<plugin>
+			   <groupId>org.apache.maven.plugins</groupId>
+			   <artifactId>maven-install-plugin</artifactId>
+			 <executions>
+			      <execution>
+					  <phase>install</phase>
+			         <id>install-jar-lib</id>
+			         <goals>
+			            <goal>install-file</goal>
+			         </goals>
+			         
+			          <configuration>
+			      <groupId>gpsUtil</groupId>
+			      <artifactId>gpsUtil</artifactId>
+			      <version>1.0.0</version>
+			      <packaging>jar</packaging>
+			      <file>${basedir}/dependencies/gpsUtil-1.0.0.jar</file>
+			       <groupId>tripPricer</groupId>
+			      <artifactId>tripPricer</artifactId>
+			      <version>1.0.0</version>
+			      <packaging>jar</packaging>
+			      <file>${basedir}/dependencies/tripPricer-1.0.0.jar</file>
+			       <groupId>rewardCentral</groupId>
+			      <artifactId>rewardCentral</artifactId>
+			      <version>1.0.0</version>
+			      <packaging>jar</packaging>
+			      <file>${basedir}/dependencies/rewardCentral-1.0.0.jar</file>
+			      <generatePom>true</generatePom>
+			   </configuration>
+			      </execution>
+			   </executions>   
+			</plugin>	  
+			 
 		</plugins>
 	</build>
 	
