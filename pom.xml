@@ -104,57 +104,8 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-				</configuration>
-				<executions> 
-			      <execution>
-					  <id>install-gps-jar-lib</id>
-					    <phase>install</phase>
-			         <goals>
-			            <goal>install-file</goal>
-			         </goals>
-				      <configuration>
-				      <groupId>gpsUtil</groupId>
-				      <artifactId>gpsUtil</artifactId>
-				      <version>1.0.0</version>
-				      <packaging>jar</packaging>
-				      <file>${basedir}/dependencies/gpsUtil-1.0.0.jar</file>
-				      <generatePom>true</generatePom>
-				   </configuration>
-			      </execution>
-			            <execution>
-							 <id>install-trippricer-jar-lib</id>
-					    <phase>install</phase>
-			         <goals>
-			            <goal>install-file</goal>
-			         </goals>
-				      <configuration>
-				      <groupId>tripPricer</groupId>
-				      <artifactId>tripPricer</artifactId>
-				      <version>1.0.0</version>
-				      <packaging>jar</packaging>
-				      <file>${basedir}/dependencies/tripPricer-1.0.0.jar</file>
-				      <generatePom>true</generatePom>
-				   </configuration>
-			      </execution>
-			            <execution>
-							 <id>install-reward-jar-lib</id>
-					    <phase>install</phase>
-			         <goals>
-			            <goal>install-file</goal>
-			         </goals>
-				      <configuration>
-				      <groupId>rewardCentral</groupId>
-				      <artifactId>rewardCentral</artifactId>
-				      <version>1.0.0</version>
-				      <packaging>jar</packaging>
-				      <file>${basedir}/dependencies/rewardCentral-1.0.0.jar</file>
-				      <generatePom>true</generatePom>
-				   </configuration>
-			      </execution>
-			    		    
-			   </executions>		
-			</plugin>
-		
+				</configuration>			
+			</plugin>	
 		</plugins>
 	</build>
 	
