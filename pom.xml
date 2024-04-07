@@ -19,6 +19,22 @@
 	</properties>
 	
 	<dependencies>
+		<!-- Modules-->
+		<dependency>
+			<groupId>gpsUtil</groupId>
+			<artifactId>gpsUtil</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>tripPricer</groupId>
+			<artifactId>tripPricer</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>rewardCentral</groupId>
+			<artifactId>rewardCentral</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -74,22 +90,7 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 
-		<!-- Modules-->
-		<dependency>
-			<groupId>gpsUtil</groupId>
-			<artifactId>gpsUtil</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>tripPricer</groupId>
-			<artifactId>tripPricer</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>rewardCentral</groupId>
-			<artifactId>rewardCentral</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+		
 	</dependencies>
 
 	<build>
