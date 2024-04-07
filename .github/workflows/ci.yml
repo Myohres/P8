@@ -24,7 +24,12 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
+          
+      - uses: actions/upload-artifact@v4
+        with:
+         name: upload artifacts
+         path: libs/*
+         
       - name: Install Maven dependencies
         run: |
          mvn install:install-file -Dfile=libs/gpsUtil.jar -DgroupId=gpsUtil -DartifactId=gpsUtil-Dversion=1.0.0 -Dpackaging=jar 
