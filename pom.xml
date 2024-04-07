@@ -105,7 +105,38 @@
 						</exclude>
 					</excludes>
 				</configuration>
+				
 			</plugin>
+			<plugin>
+					   <groupId>org.apache.maven.plugins</groupId>
+					   <artifactId>maven-install-plugin</artifactId>
+				     <dependencies>
+							<dependency>
+								<groupId>gpsUtil</groupId>
+								<artifactId>gpsUtil</artifactId>
+								<version>1.0.0</version>
+							</dependency>
+							<dependency>
+								<groupId>tripPricer</groupId>
+								<artifactId>tripPricer</artifactId>
+								<version>1.0.0</version>
+							</dependency>
+							<dependency>
+								<groupId>rewardCentral</groupId>
+								<artifactId>rewardCentral</artifactId>
+								<version>1.0.0</version>
+							</dependency>  
+						</dependencies>
+					   <!-- <executions>
+						   <execution>
+						         <id>install-jar-lib</id>
+						         <goals>
+						            <goal>install-file</goal>
+						         </goals>
+						         <phase>validate</phase>
+						   </execution>
+	               </executions>-->
+  			</plugin>
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
