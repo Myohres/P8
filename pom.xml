@@ -104,13 +104,8 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
-				</configuration>		
-			</plugin>
-			
-			<plugin>
-			   <groupId>org.apache.maven.plugins</groupId>
-			   <artifactId>maven-install-plugin</artifactId>
-			    <executions> 
+				</configuration>
+				<executions> 
 			      <execution>
 					  <id>install-gps-jar-lib</id>
 					    <phase>install</phase>
@@ -157,9 +152,9 @@
 				   </configuration>
 			      </execution>
 			    		    
-			   </executions>
-			  
+			   </executions>		
 			</plugin>
+		
 		</plugins>
 	</build>
 	
