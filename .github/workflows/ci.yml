@@ -25,6 +25,9 @@ jobs:
       with:
         name: upload artifacts
         path: libs/*
+    - uses: actions/download-artifact@v4
+      with:
+       name: upload artifacts
         
     - name: Build with Maven
       run: mvn -B package --file pom.xml
