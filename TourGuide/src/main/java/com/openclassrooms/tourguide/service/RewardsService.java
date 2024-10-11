@@ -1,7 +1,12 @@
 package com.openclassrooms.tourguide.service;
 
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.springframework.stereotype.Service;
 
@@ -38,23 +43,28 @@ public class RewardsService {
 	}
 
 	public void calculateRewards(User user) {
-		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		List<Attraction> attractions = gpsUtil.getAttractions();
-
 		try {
-			for (VisitedLocation visitedLocation : userLocations) {
-				for (Attraction attraction : attractions) {
-					if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
-						if (nearAttraction(visitedLocation, attraction)) {
-							user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-						}
-					}
-				}
-			}
+			List<VisitedLocation> userLocations = user.getVisitedLocations();
+			List<Attraction> attractions = gpsUtil.getAttractions();
+			List<UserReward> userRewardList = user.getUserRewards();
+			userLocations
+					.parallelStream()
+					.forEach(visitedLocation -> {
+						attractions
+								.parallelStream()
+								.forEach( attraction -> {
+									if (userRewardList
+											.parallelStream()
+											.filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+										if (nearAttraction(visitedLocation, attraction)) {
+											user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+										}
+									}
+								});
+					});
 		} catch (ConcurrentModificationException e) {
-			e.printStackTrace();
-		}
 
+		}
 	}
 
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
