@@ -1,7 +1,11 @@
 package com.openclassrooms.tourguide.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.openclassrooms.tourguide.tracker.Tracker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import gpsUtil.GpsUtil;
@@ -22,7 +26,8 @@ public class RewardsService {
 	private int attractionProximityRange = 200;
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
-	
+	private Logger logger = LoggerFactory.getLogger(RewardsService.class);
+
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -36,19 +41,48 @@ public class RewardsService {
 		proximityBuffer = defaultProximityBuffer;
 	}
 	
-	public void calculateRewards(User user) {
-		List<VisitedLocation> userLocations = user.getVisitedLocations();
-		List<Attraction> attractions = gpsUtil.getAttractions();
-		
-		for(VisitedLocation visitedLocation : userLocations) {
-			for(Attraction attraction : attractions) {
-				if(user.getUserRewards().stream().filter(r -> r.attraction.attractionName.equals(attraction.attractionName)).count() == 0) {
+	public void  calculateRewards(User user) {
+
+
+		synchronized (user) {
+
+			List<VisitedLocation> userLocations = user.getVisitedLocations();
+			List<Attraction> attractions = gpsUtil.getAttractions();
+
+			List<Attraction> attractionsVisited = user.getUserRewards()
+					.stream()
+					.map(userReward -> {return userReward.attraction;})
+					.toList();
+			logger.info("attractionVisited " + attractionsVisited.size());
+
+			List<Attraction> attractionNotVisited = new ArrayList<>();
+			attractionNotVisited =	attractions
+					.stream()
+					.map(attraction -> {
+						if (!attractionsVisited.contains(attraction)) {
+				return attraction;}
+                        return null;
+                    }).toList();
+			logger.info("attractionNotVisited " + attractionNotVisited.size());
+
+			logger.info("debut parcour list visitedLocation");
+			for(VisitedLocation visitedLocation : userLocations) {
+				logger.info("visitedLocation = " + visitedLocation.location.latitude + " " +visitedLocation.location.longitude);
+				for(Attraction attraction : attractionNotVisited) {
+					logger.info("attraction = " + attraction.attractionName);
+					logger.info("verification nearAttraction");
 					if(nearAttraction(visitedLocation, attraction)) {
+						logger.info("ajout Reward");
 						user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+						logger.info("userRewardSize" +user.getUserRewards().size());
 					}
+
 				}
 			}
+
 		}
+
+
 	}
 	
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
