@@ -5,7 +5,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import com.openclassrooms.tourguide.tracker.Tracker;
 import gpsUtil.location.VisitedLocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tripPricer.Provider;
 
 public class User {
@@ -18,6 +21,8 @@ public class User {
 	private List<UserReward> userRewards = new ArrayList<>();
 	private UserPreferences userPreferences = new UserPreferences();
 	private List<Provider> tripDeals = new ArrayList<>();
+
+	private Logger logger = LoggerFactory.getLogger(User.class);
 	public User(UUID userId, String userName, String phoneNumber, String emailAddress) {
 		this.userId = userId;
 		this.userName = userName;
@@ -70,8 +75,10 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
+		logger.info("addUserReward check");
 		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
 			userRewards.add(userReward);
+			logger.info("addUserReward done");
 		}
 	}
 	
