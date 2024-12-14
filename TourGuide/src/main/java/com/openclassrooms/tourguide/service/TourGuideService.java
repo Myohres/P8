@@ -7,14 +7,7 @@ import com.openclassrooms.tourguide.user.UserReward;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -95,15 +88,22 @@ public class TourGuideService {
 		return visitedLocation;
 	}
 
-	public List<Attraction> getNearByAttractions(VisitedLocation visitedLocation) {
-		List<Attraction> nearbyAttractions = new ArrayList<>();
-		for (Attraction attraction : gpsUtil.getAttractions()) {
-			if (rewardsService.isWithinAttractionProximity(attraction, visitedLocation.location)) {
-				nearbyAttractions.add(attraction);
-			}
+	public LinkedHashMap<Attraction, Double> getNearByAttractions(VisitedLocation visitedLocation) {
+		HashMap<Attraction, Double> nearbyAttractions = new HashMap<>();
+		List<Attraction> attractions = gpsUtil.getAttractions();
+
+		for (Attraction attraction : attractions) {
+			Double distance = rewardsService.getDistance(attraction, visitedLocation.location);
+			nearbyAttractions.put(attraction, distance);
 		}
 
-		return nearbyAttractions;
+		LinkedHashMap<Attraction, Double> attractionsOrder = nearbyAttractions.entrySet()
+				.stream()
+				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+				.limit(5)
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+
+		return attractionsOrder;
 	}
 
 	private void addShutDownHook() {
