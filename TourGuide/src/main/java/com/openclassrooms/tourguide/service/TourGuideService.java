@@ -8,6 +8,9 @@ import com.openclassrooms.tourguide.user.UserReward;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,6 +34,7 @@ public class TourGuideService {
 	private final TripPricer tripPricer = new TripPricer();
 	public final Tracker tracker;
 	boolean testMode = true;
+	private final ExecutorService executorService = Executors.newFixedThreadPool(500);
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -81,11 +85,46 @@ public class TourGuideService {
 		return providers;
 	}
 
+	public List<VisitedLocation> trackAllUserLocation(List<User> users) {
+logger.info("Tracking all user locations");
+		List<CompletableFuture<VisitedLocation>> futures = users.stream()
+				.map(user -> CompletableFuture.supplyAsync(() -> trackUserLocation(user), executorService))
+				.toList();
+
+		CompletableFuture<List<VisitedLocation>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+				.thenApply(v -> futures.stream()
+						.map(CompletableFuture::join)
+						.collect(Collectors.toList()));
+
+		return allOfFuture.join();
+	}
+
 	public VisitedLocation trackUserLocation(User user) {
 		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
 		user.addToVisitedLocations(visitedLocation);
 		rewardsService.calculateRewards(user);
 		return visitedLocation;
+		/*return trackUserLocationAsync(user).join();*/
+	}
+
+	public CompletableFuture<VisitedLocation> trackUserLocationAsync(User user) {
+		// Étape 1 : Récupération de la localisation utilisateur de manière asynchrone
+		/*logger.debug("trackUserLocationAsync step 1 " +user.getUserName());*/
+		CompletableFuture<VisitedLocation> locationFuture = CompletableFuture.supplyAsync(() ->
+				gpsUtil.getUserLocation(user.getUserId())
+		);
+	/*	logger.debug("trackUserLocationAsync step 2 " +user.getUserName());*/
+		// Étape 2 : Ajouter la localisation à l'utilisateur une fois qu'elle est récupérée
+		locationFuture.thenAccept(visitedLocation -> user.addToVisitedLocations(visitedLocation));
+
+		logger.info("trackUserLocationAsync step 3 " +user.getUserName());
+		// Étape 3 : Calculer les récompenses une fois que la localisation est disponible
+		locationFuture.thenAccept(visitedLocation ->
+				rewardsService.calculateRewards(user)
+		);
+
+		// Retourne un CompletableFuture avec le résultat final
+		return locationFuture;
 	}
 
 	public LinkedHashMap<Attraction, Double> getNearByAttractions(VisitedLocation visitedLocation) {

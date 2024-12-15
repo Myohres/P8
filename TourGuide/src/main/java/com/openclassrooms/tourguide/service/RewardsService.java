@@ -50,18 +50,18 @@ public class RewardsService {
 		List<Attraction> attractions = gpsUtil.getAttractions();
 
 
-		logger.info("rewardSize Start " + user.getUserRewards().size());
-		logger.info("debut parcour list visitedLocation");
+		/*logger.debug("rewardSize Start " + user.getUserRewards().size());
+		logger.debug("debut parcour list visitedLocation");*/
 		for (VisitedLocation visitedLocation : userLocations) {
 
-			logger.info("visitedLocation = " + visitedLocation.location.latitude + " " + visitedLocation.location.longitude);
+		/*	logger.debug("visitedLocation = " + visitedLocation.location.latitude + " " + visitedLocation.location.longitude);*/
 			for (Attraction attraction : attractions) {
-				logger.info("attraction = " + attraction.attractionName);
-				logger.info("verification nearAttraction");
+			/*	logger.debug("attraction = " + attraction.attractionName);
+				logger.debug("verification nearAttraction");*/
 				if (nearAttraction(visitedLocation, attraction)) {
-					logger.info("ajout Reward");
+					/*logger.debug("ajout Reward");*/
 					user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-					logger.info("userRewardSize " + user.getUserRewards().size());
+					/*logger.debug("userRewardSize " + user.getUserRewards().size());*/
 				}
 			}
 
