@@ -3,6 +3,7 @@ package com.openclassrooms.tourguide;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
@@ -91,6 +92,40 @@ public class TestTourGuideService {
 		tourGuideService.tracker.stopTracking();
 
 		assertEquals(user.getUserId(), visitedLocation.userId);
+	}
+
+	@Test
+	public void trackAllUsersLocation() {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+		InternalTestHelper.setInternalUserNumber(100);
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+
+		List<User> allUser = tourGuideService.getAllUsers();
+		HashMap<UUID,Integer> userIdUserLocationMapBeforeTracking = new HashMap<>();
+		for (User user : allUser) {
+			userIdUserLocationMapBeforeTracking.put(user.getUserId(), user.getVisitedLocations().size());
+		}
+
+		tourGuideService.trackAllUserLocation(allUser);
+
+		List<User> allUserAfter = tourGuideService.getAllUsers();
+		HashMap<UUID,Integer> userIdUserLocationMapAfterTracking = new HashMap<>();
+		for (User user : allUserAfter) {
+			userIdUserLocationMapAfterTracking.put(user.getUserId(), user.getVisitedLocations().size());
+		}
+
+		for (User user : allUser) {
+			UUID userId = user.getUserId();
+			Integer locationSizeBefore = userIdUserLocationMapBeforeTracking.get(userId);
+			Integer locationSizeAfter = userIdUserLocationMapAfterTracking.get(userId);
+			assertTrue(locationSizeBefore < locationSizeAfter);
+		}
+
+
+
+
+
 	}
 
 

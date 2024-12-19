@@ -18,7 +18,7 @@ import rewardCentral.RewardCentral;
 public class Tracker extends Thread {
 	private Logger logger = LoggerFactory.getLogger(Tracker.class);
 	private static final long trackingPollingInterval = TimeUnit.MINUTES.toSeconds(5);
-	private final ExecutorService executorService = Executors.newFixedThreadPool(200);
+	private final ExecutorService executorService = Executors.newFixedThreadPool(40);
 	private final TourGuideService tourGuideService;
 	private boolean stop = false;
 
@@ -41,20 +41,20 @@ public class Tracker extends Thread {
 		StopWatch stopWatch = new StopWatch();
 		while (true) {
 			if (Thread.currentThread().isInterrupted() || stop) {
-				logger.debug("Tracker stopping");
+				logger.info("Tracker stopping");
 				break;
 			}
 
 			List<User> users = tourGuideService.getAllUsers();
-			logger.debug("Begin Tracker. Tracking " + users.size() + " users.");
+			logger.info("Begin Tracker. Tracking " + users.size() + " users.");
 			stopWatch.start();
 
 			tourGuideService.trackAllUserLocation(users);
 			stopWatch.stop();
-			logger.debug("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
+			logger.info("Tracker Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime()) + " seconds.");
 			stopWatch.reset();
 			try {
-				logger.debug("Tracker sleeping");
+				logger.info("Tracker sleeping");
 				TimeUnit.SECONDS.sleep(trackingPollingInterval);
 			} catch (InterruptedException e) {
 				break;
