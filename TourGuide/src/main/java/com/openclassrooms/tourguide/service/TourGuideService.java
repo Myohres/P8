@@ -34,7 +34,7 @@ public class TourGuideService {
 	private final TripPricer tripPricer = new TripPricer();
 	public final Tracker tracker;
 	boolean testMode = true;
-	private final ExecutorService executorService = Executors.newFixedThreadPool(40);
+	private final ExecutorService executorService = Executors.newFixedThreadPool(200);
 
 	public TourGuideService(GpsUtil gpsUtil, RewardsService rewardsService) {
 		this.gpsUtil = gpsUtil;
@@ -86,7 +86,7 @@ public class TourGuideService {
 	}
 
 	public List<VisitedLocation> trackAllUserLocation(List<User> users) {
-logger.info("Tracking all user locations");
+		logger.info("Tracking all user locations");
 		List<CompletableFuture<VisitedLocation>> futures = users.stream()
 				.map(user -> CompletableFuture.supplyAsync(() -> trackUserLocation(user), executorService))
 				.toList();

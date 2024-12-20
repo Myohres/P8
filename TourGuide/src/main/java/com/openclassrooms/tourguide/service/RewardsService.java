@@ -2,8 +2,8 @@ package com.openclassrooms.tourguide.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 import com.openclassrooms.tourguide.tracker.Tracker;
 import org.slf4j.Logger;
@@ -30,6 +30,8 @@ public class RewardsService {
 	private final RewardCentral rewardsCentral;
 	private Logger logger = LoggerFactory.getLogger(RewardsService.class);
 
+	private final ExecutorService executorService = Executors.newFixedThreadPool(550);
+
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -41,6 +43,20 @@ public class RewardsService {
 
 	public void setDefaultProximityBuffer() {
 		proximityBuffer = defaultProximityBuffer;
+	}
+
+	public void calculateRewardAllUser(List<User> users) {
+		logger.info("Tracking all user locations");
+		List<CompletableFuture<Void>> futures = users.stream()
+				.map(user -> CompletableFuture.runAsync(() -> calculateRewards(user), executorService))
+				.toList();
+
+		CompletableFuture<List<Void>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+				.thenApply(v -> futures.stream()
+						.map(CompletableFuture::join)
+						.collect(Collectors.toList()));
+
+		allOfFuture.join();
 	}
 
 	public void  calculateRewards(User user) {
