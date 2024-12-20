@@ -91,7 +91,8 @@ public class TestPerformance {
 		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
 	/*	allUsers.forEach(u -> rewardsService.calculateRewards(u));*/
-		rewardsService.calculateRewardAllUser(allUsers);
+		/*rewardsService.calculateRewardAllUser(allUsers);*/
+		tourGuideService.trackAllUserLocation(allUsers);
 
 		for (User user : allUsers) {
 			assertTrue(user.getUserRewards().size() > 0);

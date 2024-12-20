@@ -31,7 +31,7 @@ public class RewardsService {
 	private Logger logger = LoggerFactory.getLogger(RewardsService.class);
 
 	private final ExecutorService executorService = Executors.newFixedThreadPool(550);
-
+	private final ExecutorService executorService2 = Executors.newFixedThreadPool(550);
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -65,23 +65,27 @@ public class RewardsService {
 		List<VisitedLocation> userLocations = new CopyOnWriteArrayList<>(user.getVisitedLocations());
 		List<Attraction> attractions = gpsUtil.getAttractions();
 
+List<CompletableFuture<Void>> futures = userLocations.stream()
+		.map(visitedLocation -> CompletableFuture.runAsync(() -> {
+			attractions.stream()
+					.filter(attraction -> nearAttraction(visitedLocation, attraction))
+					.forEach(attraction -> {
+								user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
+							});
 
-		/*logger.debug("rewardSize Start " + user.getUserRewards().size());
-		logger.debug("debut parcour list visitedLocation");*/
-		for (VisitedLocation visitedLocation : userLocations) {
+				}, executorService2))
+		.toList();
 
-		/*	logger.debug("visitedLocation = " + visitedLocation.location.latitude + " " + visitedLocation.location.longitude);*/
-			for (Attraction attraction : attractions) {
-			/*	logger.debug("attraction = " + attraction.attractionName);
-				logger.debug("verification nearAttraction");*/
-				if (nearAttraction(visitedLocation, attraction)) {
-					/*logger.debug("ajout Reward");*/
-					user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
-					/*logger.debug("userRewardSize " + user.getUserRewards().size());*/
-				}
-			}
+		CompletableFuture<List<Void>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+				.thenApply(v -> futures.stream()
+						.map(CompletableFuture::join)
+						.collect(Collectors.toList()));
 
-		}
+		 allOfFuture.join();
+
+
+
+
 	}
 
 

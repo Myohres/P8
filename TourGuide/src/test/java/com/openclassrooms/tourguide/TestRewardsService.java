@@ -57,68 +57,7 @@ public class TestRewardsService {
 
 	}
 
-	@Test
-	public void calculateReward() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 
-		InternalTestHelper.setInternalUserNumber(0);
-		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
-
-		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-		Attraction attraction = gpsUtil.getAttractions().get(0);
-		VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), attraction, new Date());
-
-		user.addToVisitedLocations(visitedLocation);
-
-		int rewardSizeBefore = user.getUserRewards().size();
-		rewardsService.calculateRewards(user);
-		int rewardSizeAfter = user.getUserRewards().size();
-
-		tourGuideService.tracker.stopTracking();
-
-		assertTrue(rewardSizeBefore < rewardSizeAfter);
-	}
-
-	@Test
-	public void calculateRewardAllUser() {
-		GpsUtil gpsUtil = new GpsUtil();
-		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
-
-		InternalTestHelper.setInternalUserNumber(0);
-		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
-
-
-		List<User> allUser = new ArrayList<>();
-		HashMap<UUID, Integer> userRewardSizeBefore = new HashMap<>();
-
-		for ( int i =0; i<10; i++) {
-			User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
-			Attraction attraction = gpsUtil.getAttractions().get(0);
-			VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), attraction, new Date());
-			user.addToVisitedLocations(visitedLocation);
-			allUser.add(user);
-			userRewardSizeBefore.put(user.getUserId(), user.getUserRewards().size());
-		}
-
-		rewardsService.calculateRewardAllUser(allUser);
-
-		List<User> allUserAfter = tourGuideService.getAllUsers();
-		HashMap<UUID, Integer> userRewardSizeAfter = new HashMap<>();
-
-		for (User user : allUserAfter) {
-			userRewardSizeAfter.put(user.getUserId(), user.getUserRewards().size());
-		}
-
-		tourGuideService.tracker.stopTracking();
-
-		for (User user : allUserAfter) {
-			UUID userId = user.getUserId();
-			Integer userRewardBefore = userRewardSizeBefore.get(userId);
-			Integer userRewardAfter = userRewardSizeAfter.get(userId);
-			assertTrue(userRewardBefore < userRewardAfter);
-		}
-	}
 
 	@Test
 	public void addTwoRewardsForDifferentAttraction() {
@@ -163,6 +102,93 @@ public class TestRewardsService {
 
 		tourGuideService.tracker.stopTracking();
 		assertEquals(user.getUserRewards().size(), 1);
+	}
+
+	@Test
+	public void calculateReward() {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+
+		InternalTestHelper.setInternalUserNumber(0);
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		Attraction attraction = gpsUtil.getAttractions().get(0);
+		VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), attraction, new Date());
+
+		user.addToVisitedLocations(visitedLocation);
+
+		int rewardSizeBefore = user.getUserRewards().size();
+		rewardsService.calculateRewards(user);
+		int rewardSizeAfter = user.getUserRewards().size();
+
+		tourGuideService.tracker.stopTracking();
+
+		assertTrue(rewardSizeBefore < rewardSizeAfter);
+	}
+
+	@Test
+	public void calculateRewardAttractionNotNear() {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+		rewardsService.setProximityBuffer(Integer.MIN_VALUE);
+
+		InternalTestHelper.setInternalUserNumber(0);
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		Attraction attraction = gpsUtil.getAttractions().get(0);
+		VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), attraction, new Date());
+
+		user.addToVisitedLocations(visitedLocation);
+
+		int rewardSizeBefore = user.getUserRewards().size();
+		rewardsService.calculateRewards(user);
+		int rewardSizeAfter = user.getUserRewards().size();
+
+		tourGuideService.tracker.stopTracking();
+
+		assertTrue(rewardSizeBefore == rewardSizeAfter);
+	}
+
+	@Test
+	public void calculateRewardAllUser() {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+
+		InternalTestHelper.setInternalUserNumber(0);
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+
+
+		List<User> allUser = new ArrayList<>();
+		HashMap<UUID, Integer> userRewardSizeBefore = new HashMap<>();
+
+		for ( int i =0; i<10; i++) {
+			User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+			Attraction attraction = gpsUtil.getAttractions().get(0);
+			VisitedLocation visitedLocation = new VisitedLocation(user.getUserId(), attraction, new Date());
+			user.addToVisitedLocations(visitedLocation);
+			allUser.add(user);
+			userRewardSizeBefore.put(user.getUserId(), user.getUserRewards().size());
+		}
+
+		rewardsService.calculateRewardAllUser(allUser);
+
+		List<User> allUserAfter = tourGuideService.getAllUsers();
+		HashMap<UUID, Integer> userRewardSizeAfter = new HashMap<>();
+
+		for (User user : allUserAfter) {
+			userRewardSizeAfter.put(user.getUserId(), user.getUserRewards().size());
+		}
+
+		tourGuideService.tracker.stopTracking();
+
+		for (User user : allUserAfter) {
+			UUID userId = user.getUserId();
+			Integer userRewardBefore = userRewardSizeBefore.get(userId);
+			Integer userRewardAfter = userRewardSizeAfter.get(userId);
+			assertTrue(userRewardBefore < userRewardAfter);
+		}
 	}
 
 	@Test
