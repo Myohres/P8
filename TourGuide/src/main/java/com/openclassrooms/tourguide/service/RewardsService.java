@@ -46,7 +46,6 @@ public class RewardsService {
 	}
 
 	public void calculateRewardAllUser(List<User> users) {
-		logger.info("Tracking all user locations");
 		List<CompletableFuture<Void>> futures = users.stream()
 				.map(user -> CompletableFuture.runAsync(() -> calculateRewards(user), executorService))
 				.toList();
@@ -59,37 +58,27 @@ public class RewardsService {
 		allOfFuture.join();
 	}
 
-	public void  calculateRewards(User user) {
-
-
+	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = new CopyOnWriteArrayList<>(user.getVisitedLocations());
 		List<Attraction> attractions = gpsUtil.getAttractions();
 
-List<CompletableFuture<Void>> futures = userLocations.stream()
-		.map(visitedLocation -> CompletableFuture.runAsync(() -> {
-			attractions.stream()
-					.filter(attraction -> nearAttraction(visitedLocation, attraction))
-					.forEach(attraction -> {
+		List<CompletableFuture<Void>> futures = userLocations.stream()
+				.map(visitedLocation -> CompletableFuture.runAsync(() -> {
+					attractions.stream()
+							.filter(attraction -> nearAttraction(visitedLocation, attraction))
+							.forEach(attraction -> {
 								user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 							});
-
 				}, executorService2))
-		.toList();
+				.toList();
 
 		CompletableFuture<List<Void>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
 				.thenApply(v -> futures.stream()
 						.map(CompletableFuture::join)
 						.collect(Collectors.toList()));
 
-		 allOfFuture.join();
-
-
-
-
+		allOfFuture.join();
 	}
-
-
-
 
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
 		return getDistance(attraction, location) > attractionProximityRange ? false : true;

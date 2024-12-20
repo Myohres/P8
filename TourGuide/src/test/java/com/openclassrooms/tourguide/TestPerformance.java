@@ -60,9 +60,7 @@ public class TestPerformance {
 
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
-		/*for (User user : allUsers) {
-			tourGuideService.trackUserLocation(user);
-		}*/
+
 		tourGuideService.trackAllUserLocation(allUsers);
 		stopWatch.stop();
 		tourGuideService.tracker.stopTracking();
@@ -90,8 +88,6 @@ public class TestPerformance {
 		allUsers = tourGuideService.getAllUsers();
 		allUsers.forEach(u -> u.addToVisitedLocations(new VisitedLocation(u.getUserId(), attraction, new Date())));
 
-	/*	allUsers.forEach(u -> rewardsService.calculateRewards(u));*/
-		/*rewardsService.calculateRewardAllUser(allUsers);*/
 		tourGuideService.trackAllUserLocation(allUsers);
 
 		for (User user : allUsers) {

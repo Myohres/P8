@@ -3,10 +3,7 @@ package com.openclassrooms.tourguide;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -146,22 +143,58 @@ public class TestTourGuideService {
 		assertEquals(5, attractions.size());
 	}
 
-	//Todo make sure that actraction are the closest
+
 	@Test
 	public void getNearbyAttractions() {
 		GpsUtil gpsUtil = new GpsUtil();
 		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
 		InternalTestHelper.setInternalUserNumber(0);
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+		tourGuideService.setNearByAttractionNumber(gpsUtil.getAttractions().size());
+
 
 		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
 		VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
 
-		LinkedHashMap<Attraction,Double> attractions = tourGuideService.getNearByAttractions(visitedLocation);
+		LinkedHashMap<Attraction,Double> allAttractionDistance = tourGuideService.getNearByAttractions(visitedLocation);
+
+		tourGuideService.setNearByAttractionNumberDefault();
+		LinkedHashMap<Attraction,Double> defaultAttractionDistance = tourGuideService.getNearByAttractions(visitedLocation);
 
 		tourGuideService.tracker.stopTracking();
 
-		assertEquals(5, attractions.size());
+		Iterator<Attraction> keyIteratorDefaultAttractionDistance = defaultAttractionDistance.keySet().iterator();
+		Iterator<Attraction> keyIteratorAllAttractionDistance = allAttractionDistance.keySet().iterator();
+		while (keyIteratorDefaultAttractionDistance.hasNext()) {
+			Attraction attractionDefaultKey = keyIteratorDefaultAttractionDistance.next();
+			Attraction attractionAllKey = keyIteratorAllAttractionDistance.next();
+            assertEquals(attractionDefaultKey.attractionName, attractionAllKey.attractionName);
+		}
+	}
+
+	@Test
+	public void getNearbyAttractionsOrdered() {
+		GpsUtil gpsUtil = new GpsUtil();
+		RewardsService rewardsService = new RewardsService(gpsUtil, new RewardCentral());
+		InternalTestHelper.setInternalUserNumber(0);
+		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
+		tourGuideService.setNearByAttractionNumber(gpsUtil.getAttractions().size());
+
+		User user = new User(UUID.randomUUID(), "jon", "000", "jon@tourGuide.com");
+		VisitedLocation visitedLocation = tourGuideService.trackUserLocation(user);
+
+		LinkedHashMap<Attraction,Double> attractionDistance = tourGuideService.getNearByAttractions(visitedLocation);
+
+		tourGuideService.tracker.stopTracking();
+
+		Iterator<Attraction> keyIteratorAttractionDistance = attractionDistance.keySet().iterator();
+		while (keyIteratorAttractionDistance.hasNext()) {
+			Attraction attractionKey = keyIteratorAttractionDistance.next();
+			Double distance1 = attractionDistance.get(attractionKey);
+			Attraction attractionKey2  = keyIteratorAttractionDistance.next();
+			double distance2 = attractionDistance.get(attractionKey2);
+			assertTrue(distance1 > distance2);
+		}
 	}
 
 	public void getTripDeals() {

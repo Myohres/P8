@@ -29,6 +29,10 @@ import tripPricer.TripPricer;
 @Service
 public class TourGuideService {
 	private Logger logger = LoggerFactory.getLogger(TourGuideService.class);
+
+	private int nearByAttractionNumberDefault = 5;
+	private int nearByAttractionNumber = nearByAttractionNumberDefault;
+
 	private final GpsUtil gpsUtil;
 	private final RewardsService rewardsService;
 	private final TripPricer tripPricer = new TripPricer();
@@ -50,6 +54,14 @@ public class TourGuideService {
 		}
 		tracker = new Tracker(this);
 		addShutDownHook();
+	}
+
+	public void setNearByAttractionNumber(int nearByAttractionNumber) {
+		this.nearByAttractionNumber = nearByAttractionNumber;
+	}
+
+	public void setNearByAttractionNumberDefault() {
+		nearByAttractionNumber = nearByAttractionNumberDefault;
 	}
 
 	public List<UserReward> getUserRewards(User user) {
@@ -85,47 +97,24 @@ public class TourGuideService {
 		return providers;
 	}
 
-	public List<VisitedLocation> trackAllUserLocation(List<User> users) {
-		logger.info("Tracking all user locations");
-		List<CompletableFuture<VisitedLocation>> futures = users.stream()
-				.map(user -> CompletableFuture.supplyAsync(() -> trackUserLocation(user), executorService))
+	public void trackAllUserLocation(List<User> users) {
+		List<CompletableFuture<Void>> futures = users.stream()
+				.map(user -> CompletableFuture.runAsync(() -> trackUserLocation(user), executorService))
 				.toList();
 
-		CompletableFuture<List<VisitedLocation>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+		CompletableFuture<List<Void>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
 				.thenApply(v -> futures.stream()
 						.map(CompletableFuture::join)
 						.collect(Collectors.toList()));
 
-		return allOfFuture.join();
+		allOfFuture.join();
 	}
 
 	public VisitedLocation trackUserLocation(User user) {
-		logger.info("Tracking user location : " + user.getUserName());
 		VisitedLocation visitedLocation = gpsUtil.getUserLocation(user.getUserId());
 		user.addToVisitedLocations(visitedLocation);
 		rewardsService.calculateRewards(user);
 		return visitedLocation;
-		/*return trackUserLocationAsync(user).join();*/
-	}
-
-	public CompletableFuture<VisitedLocation> trackUserLocationAsync(User user) {
-		// Étape 1 : Récupération de la localisation utilisateur de manière asynchrone
-		/*logger.debug("trackUserLocationAsync step 1 " +user.getUserName());*/
-		CompletableFuture<VisitedLocation> locationFuture = CompletableFuture.supplyAsync(() ->
-				gpsUtil.getUserLocation(user.getUserId())
-		);
-	/*	logger.debug("trackUserLocationAsync step 2 " +user.getUserName());*/
-		// Étape 2 : Ajouter la localisation à l'utilisateur une fois qu'elle est récupérée
-		locationFuture.thenAccept(visitedLocation -> user.addToVisitedLocations(visitedLocation));
-
-		logger.info("trackUserLocationAsync step 3 " +user.getUserName());
-		// Étape 3 : Calculer les récompenses une fois que la localisation est disponible
-		locationFuture.thenAccept(visitedLocation ->
-				rewardsService.calculateRewards(user)
-		);
-
-		// Retourne un CompletableFuture avec le résultat final
-		return locationFuture;
 	}
 
 	public LinkedHashMap<Attraction, Double> getNearByAttractions(VisitedLocation visitedLocation) {
@@ -137,13 +126,11 @@ public class TourGuideService {
 			nearbyAttractions.put(attraction, distance);
 		}
 
-		LinkedHashMap<Attraction, Double> attractionsOrder = nearbyAttractions.entrySet()
+        return nearbyAttractions.entrySet()
 				.stream()
 				.sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-				.limit(5)
+				.limit(nearByAttractionNumber)
 				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-
-		return attractionsOrder;
 	}
 
 	private void addShutDownHook() {
