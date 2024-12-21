@@ -75,10 +75,8 @@ public class User {
 	}
 	
 	public void addUserReward(UserReward userReward) {
-		logger.debug("addUserReward check");
 		if(userRewards.stream().noneMatch(r -> r.attraction.attractionName.equals(userReward.attraction.attractionName))) {
 			userRewards.add(userReward);
-			logger.debug("addUserReward done");
 		}
 	}
 	
