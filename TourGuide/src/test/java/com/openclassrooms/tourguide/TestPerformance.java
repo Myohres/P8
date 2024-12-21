@@ -82,7 +82,7 @@ public class TestPerformance {
 		StopWatch stopWatch = new StopWatch();
 		stopWatch.start();
 		TourGuideService tourGuideService = new TourGuideService(gpsUtil, rewardsService);
-
+		tourGuideService.tracker.stopTracking();
 		Attraction attraction = gpsUtil.getAttractions().get(0);
 		List<User> allUsers = new ArrayList<>();
 		allUsers = tourGuideService.getAllUsers();
@@ -94,7 +94,7 @@ public class TestPerformance {
 			assertTrue(user.getUserRewards().size() > 0);
 		}
 		stopWatch.stop();
-		tourGuideService.tracker.stopTracking();
+
 
 		System.out.println("highVolumeGetRewards: Time Elapsed: " + TimeUnit.MILLISECONDS.toSeconds(stopWatch.getTime())
 				+ " seconds.");

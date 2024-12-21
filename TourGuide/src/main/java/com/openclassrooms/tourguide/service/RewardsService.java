@@ -30,8 +30,8 @@ public class RewardsService {
 	private final RewardCentral rewardsCentral;
 	private Logger logger = LoggerFactory.getLogger(RewardsService.class);
 
-	private final ExecutorService executorService = Executors.newFixedThreadPool(550);
-	private final ExecutorService executorService2 = Executors.newFixedThreadPool(550);
+	private final ExecutorService executorService = Executors.newFixedThreadPool(180);
+	private final ExecutorService executorService2 = Executors.newFixedThreadPool(300);
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;

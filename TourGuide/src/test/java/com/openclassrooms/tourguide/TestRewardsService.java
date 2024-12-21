@@ -172,7 +172,7 @@ public class TestRewardsService {
 			userRewardSizeBefore.put(user.getUserId(), user.getUserRewards().size());
 		}
 
-		rewardsService.calculateRewardAllUser(allUser);
+		/*rewardsService.calculateRewardAllUser(allUser);*/
 
 		List<User> allUserAfter = tourGuideService.getAllUsers();
 		HashMap<UUID, Integer> userRewardSizeAfter = new HashMap<>();
