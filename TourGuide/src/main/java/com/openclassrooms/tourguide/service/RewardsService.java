@@ -1,11 +1,9 @@
 package com.openclassrooms.tourguide.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import com.openclassrooms.tourguide.tracker.Tracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,9 +27,8 @@ public class RewardsService {
 	private final GpsUtil gpsUtil;
 	private final RewardCentral rewardsCentral;
 	private Logger logger = LoggerFactory.getLogger(RewardsService.class);
+	private final ExecutorService executorService = Executors.newFixedThreadPool(300);
 
-	private final ExecutorService executorService = Executors.newFixedThreadPool(180);
-	private final ExecutorService executorService2 = Executors.newFixedThreadPool(300);
 	public RewardsService(GpsUtil gpsUtil, RewardCentral rewardCentral) {
 		this.gpsUtil = gpsUtil;
 		this.rewardsCentral = rewardCentral;
@@ -45,19 +42,6 @@ public class RewardsService {
 		proximityBuffer = defaultProximityBuffer;
 	}
 
-	public void calculateRewardAllUser(List<User> users) {
-		List<CompletableFuture<Void>> futures = users.stream()
-				.map(user -> CompletableFuture.runAsync(() -> calculateRewards(user), executorService))
-				.toList();
-
-		CompletableFuture<List<Void>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-				.thenApply(v -> futures.stream()
-						.map(CompletableFuture::join)
-						.collect(Collectors.toList()));
-
-		allOfFuture.join();
-	}
-
 	public void calculateRewards(User user) {
 		List<VisitedLocation> userLocations = new CopyOnWriteArrayList<>(user.getVisitedLocations());
 		List<Attraction> attractions = gpsUtil.getAttractions();
@@ -69,15 +53,15 @@ public class RewardsService {
 							.forEach(attraction -> {
 								user.addUserReward(new UserReward(visitedLocation, attraction, getRewardPoints(attraction, user)));
 							});
-				}, executorService2))
+				}, executorService))
 				.toList();
 
 		CompletableFuture<List<Void>> allOfFuture = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
 				.thenApply(v -> futures.stream()
 						.map(CompletableFuture::join)
 						.collect(Collectors.toList()));
-
 		allOfFuture.join();
+
 	}
 
 	public boolean isWithinAttractionProximity(Attraction attraction, Location location) {
